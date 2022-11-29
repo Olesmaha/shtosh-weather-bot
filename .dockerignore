@@ -1,0 +1,25 @@
+# flyctl launch added from .gitignore
+**\.idea
+**\.vscode
+**\__pycache__
+**\venv*
+**\.log
+**\.env
+
+# flyctl launch added from .idea\.gitignore
+# Default ignored files
+.idea\shelf
+.idea\workspace.xml
+# Editor-based HTTP Client requests
+.idea\httpRequests
+# Datasource local storage ignored files
+.idea\dataSources
+.idea\dataSources.local.xml
+
+# flyctl launch added from venv\.gitignore
+# created by virtualenv automatically
+venv\**\.idea
+venv\**\.vscode
+venv\**\__pycache__
+venv\**\venv*
+venv\**\.log
