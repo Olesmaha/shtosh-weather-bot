@@ -1,22 +1,40 @@
-from coordinates import get_coordinates
+from typing import Optional
+
+from coordinates import get_coordinates, Coordinates
 from api_service import get_weather
 
 
-def weather() -> str:
+def weather(coordinates: Optional[Coordinates] = None) -> str:
     """Returns a message about the temperature and weather description"""
-    wthr = get_weather(get_coordinates())
-    return f'{wthr.location}, {wthr.description}\n' \
+    location_text = 'user'
+    if coordinates is None:
+        location_text = 'server'
+        coordinates = get_coordinates()
+
+    wthr = get_weather(coordinates)
+    return f'{wthr.location}, {wthr.description} ({location_text})\n' \
            f'Temperature is {wthr.temperature}°C, feels like {wthr.temperature_feeling}°C'
 
 
-def wind() -> str:
+def wind(coordinates: Optional[Coordinates] = None) -> str:
     """Returns a message about wind direction and speed"""
-    wthr = get_weather(get_coordinates())
-    return f'{wthr.wind_direction} wind {wthr.wind_speed} m/s'
+    location_text = 'user'
+    if coordinates is None:
+        location_text = 'server'
+        coordinates = get_coordinates()
+
+    wthr = get_weather(coordinates)
+    return f'{wthr.wind_direction} wind {wthr.wind_speed} m/s  ({location_text})'
 
 
-def sun_time() -> str:
+def suntime(coordinates: Optional[Coordinates] = None) -> str:
     """Returns a message about the time of sunrise and sunset"""
-    wthr = get_weather(get_coordinates())
+    location_text = 'user'
+    if coordinates is None:
+        location_text = 'server'
+        coordinates = get_coordinates()
+
+    wthr = get_weather(coordinates)
     return f'Sunrise: {wthr.sunrise.strftime("%H:%M")}\n' \
-           f'Sunset: {wthr.sunset.strftime("%H:%M")}\n'
+           f'Sunset: {wthr.sunset.strftime("%H:%M")}\n' \
+           f' ({location_text})'

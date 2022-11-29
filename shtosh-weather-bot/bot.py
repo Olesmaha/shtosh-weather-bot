@@ -1,37 +1,62 @@
 import logging
-
+from typing import Optional
 from aiogram import Bot, Dispatcher, executor, types
+from aiogram.types import ContentType
 
 import inline_keyboard
 import messages
 import config
+from coordinates import Coordinates
+from dataclasses import dataclass
 
 logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=config.BOT_API_TOKEN)
 dp = Dispatcher(bot)
 
+users_date = {}
+user_coordinates: Optional[Coordinates] = None
 
-@dp.message_handler(commands=['start', 'weather'])
+
+@dataclass(slots=True, frozen=True)
+class Coordinates:
+    latitude: float
+    longitude: float
+
+
+@dp.message_handler(commands='start')
 async def show_weather(message: types.Message):
-    await message.answer(text=messages.weather(),
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    keyboard.add(types.KeyboardButton(text='Send geolocation', request_location=True))
+    await message.answer(text=f"Hello, I'm weather bot. Please, send me your location.",
+                         reply_markup=keyboard)
+
+
+@dp.message_handler(content_types=ContentType.LOCATION)
+async def get_location(message: types.Message):
+    global user_coordinates
+    user_coordinates = Coordinates(longitude=message.location.longitude, latitude=message.location.latitude)
+    users_date[message.from_user.id] = user_coordinates
+    await message.answer(text=f'Thank you! Now choose type of information:',
+                         reply_markup=inline_keyboard.START)
+
+
+@dp.message_handler(commands='weather')
+async def show_weather(message: types.Message):
+    await message.answer(text=messages.weather(users_date[message.from_user.id]),
                          reply_markup=inline_keyboard.WEATHER)
-
-
-@dp.message_handler(commands='help')
-async def show_help_message(message: types.Message):
-    await message.answer(text=f'This bot can get the current weather from your IP address.',
-                         reply_markup=inline_keyboard.HELP)
 
 
 @dp.message_handler(commands='wind')
 async def show_wind(message: types.Message):
-    await message.answer(text=messages.wind(), reply_markup=inline_keyboard.WIND)
+    await message.answer(text=messages.wind(users_date[message.from_user.id]),
+                         reply_markup=inline_keyboard.WIND)
 
 
 @dp.message_handler(commands='sun_time')
 async def show_sun_time(message: types.Message):
-    await message.answer(text=messages.sun_time(), reply_markup=inline_keyboard.SUN_TIME)
+    await message.answer(text=messages.suntime(users_date[message.from_user.id]),
+                         reply_markup=inline_keyboard.SUN_TIME)
 
 
 @dp.callback_query_handler(text='weather')
@@ -39,7 +64,7 @@ async def process_callback_weather(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(
         callback_query.from_user.id,
-        text=messages.weather(),
+        text=messages.weather(users_date[callback_query.from_user.id]),
         reply_markup=inline_keyboard.WEATHER
     )
 
@@ -49,7 +74,7 @@ async def process_callback_wind(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(
         callback_query.from_user.id,
-        text=messages.wind(),
+        text=messages.wind(users_date[callback_query.from_user.id]),
         reply_markup=inline_keyboard.WIND
     )
 
@@ -59,7 +84,7 @@ async def process_callback_sun_time(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(
         callback_query.from_user.id,
-        text=messages.sun_time(),
+        text=messages.suntime(users_date[callback_query.from_user.id]),
         reply_markup=inline_keyboard.SUN_TIME
     )
 

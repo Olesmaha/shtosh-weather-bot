@@ -35,7 +35,7 @@ class Weather:
 
 
 def get_weather(coordinates=Coordinates) -> Weather:
-    """Requests the weather in OpenWeather API and returns it"""
+    """Request the weather in OpenWeather API and returns it"""
     openweather_response = _get_openweather_response(
         longitude=coordinates.longitude, latitude=coordinates.latitude
     )
