@@ -78,8 +78,9 @@ def _parse_description(openweather_dict) -> str:
     return str(openweather_dict['weather'][0]['description']).capitalize()
 
 
-def _parse_sun_time(openweather_dict: dict, time: Literal["sunrise", "sunset"]) -> datetime:
-    return datetime.fromtimestamp(openweather_dict['sys'][time])
+def _parse_sun_time(openweather_dict: dict, time: Literal['sunrise', 'sunset']) -> datetime:
+    openweather_dict['sys'][time] = openweather_dict['sys'][time] + openweather_dict['timezone']
+    return datetime.utcfromtimestamp(openweather_dict['sys'][time])
 
 
 def _parse_wind_speed(openweather_dict: dict) -> float:

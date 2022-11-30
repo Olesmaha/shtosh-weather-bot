@@ -1,6 +1,8 @@
 from urllib.request import urlopen
 from dataclasses import dataclass
+from datetime import tzinfo
 import json
+from zoneinfo import ZoneInfo
 
 
 @dataclass(slots=True, frozen=True)
@@ -21,4 +23,4 @@ def get_coordinates() -> Coordinates:
 def _get_ip_data() -> dict:
     url = 'http://ipinfo.io/json'
     response = urlopen(url)
-    return json.load(response)
+    return json.loads(response)
