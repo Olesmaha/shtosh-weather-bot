@@ -1,8 +1,8 @@
 import os
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 from sys import exit
 
-# load_dotenv()
+load_dotenv()
 
 BOT_API_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_API_TOKEN:

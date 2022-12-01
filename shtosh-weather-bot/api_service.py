@@ -9,7 +9,7 @@ from bot import Coordinates
 import config
 
 Celsius: TypeAlias = float
-Kelvin: TypeAlias = float
+Fahrenheit: TypeAlias = float
 
 
 class WindDirection(IntEnum):
@@ -28,13 +28,14 @@ class Weather:
     location: str
     temperature_cel: Celsius
     temperature_cel_feeling: Celsius
-    temperature_kel: Kelvin
-    temperature_kel_feeling: Kelvin
+    temperature_fah: Fahrenheit
+    temperature_fah_feeling: Fahrenheit
     description: str
     wind_speed: float
     wind_direction: str
     sunrise: datetime
     sunset: datetime
+    country: str
 
 
 def get_weather(coordinates=Coordinates) -> Weather:
@@ -57,13 +58,14 @@ def _parse_openweather_response(openweather_response: str) -> Weather:
         location=_parse_location(openweather_dict),
         temperature_cel=_parse_temperature_cel(openweather_dict),
         temperature_cel_feeling=_parse_temperature_cel_feeling(openweather_dict),
-        temperature_kel=_parse_temperature_kel(openweather_dict),
-        temperature_kel_feeling=_parse_temperature_kel_feeling(openweather_dict),
+        temperature_fah=_parse_temperature_fah(openweather_dict),
+        temperature_fah_feeling=_parse_temperature_fah_feeling(openweather_dict),
         description=_parse_description(openweather_dict),
         sunrise=_parse_sun_time(openweather_dict, 'sunrise'),
         sunset=_parse_sun_time(openweather_dict, 'sunset'),
         wind_speed=_parse_wind_speed(openweather_dict),
-        wind_direction=_parse_wind_direction(openweather_dict)
+        wind_direction=_parse_wind_direction(openweather_dict),
+        country=_parse_country(openweather_dict)
     )
 
 
@@ -79,14 +81,14 @@ def _parse_temperature_cel_feeling(openweather_dict: dict) -> Celsius:
     return openweather_dict['main']['feels_like']
 
 
-def _parse_temperature_kel(openweather_dict: dict) -> Kelvin:
-    openweather_dict['main']['temp_kel'] = round(openweather_dict['main']['temp'] + 273.15, 2)
-    return openweather_dict['main']['temp_kel']
+def _parse_temperature_fah(openweather_dict: dict) -> Fahrenheit:
+    openweather_dict['main']['temp_fah'] = round((openweather_dict['main']['temp'] * 9 / 5) + 32, 1)
+    return openweather_dict['main']['temp_fah']
 
 
-def _parse_temperature_kel_feeling(openweather_dict: dict) -> Kelvin:
-    openweather_dict['main']['kel_feels_like'] = round(openweather_dict['main']['feels_like'] + 273.15, 2)
-    return openweather_dict['main']['kel_feels_like']
+def _parse_temperature_fah_feeling(openweather_dict: dict) -> Fahrenheit:
+    openweather_dict['main']['fah_feels_like'] = round((openweather_dict['main']['feels_like'] * 9 / 5) + 32, 1)
+    return openweather_dict['main']['fah_feels_like']
 
 
 def _parse_description(openweather_dict) -> str:
@@ -108,3 +110,7 @@ def _parse_wind_direction(openweather_dict: dict) -> str:
     if degrees == 360:
         degrees = 0
     return WindDirection(degrees).name
+
+
+def _parse_country(openweather_dict: dict) -> str:
+    return openweather_dict['sys']['country']

@@ -9,18 +9,15 @@ class Coordinates:
     longitude: float
 
 
-def weather_celsius(coordinates: Optional[Coordinates] = None) -> str:
+def weather(coordinates: Optional[Coordinates] = None) -> str:
     """Returns a message about the temperature and weather description"""
     wthr = get_weather(coordinates)
-    return f'{wthr.location}, {wthr.description}\n' \
-           f'Temperature is {wthr.temperature_cel}°C, feels like {wthr.temperature_cel_feeling}°C'
-
-
-def weather_kelvin(coordinates: Optional[Coordinates] = None) -> str:
-    """Returns a message about the temperature and weather description"""
-    wthr = get_weather(coordinates)
-    return f'{wthr.location}, {wthr.description}\n' \
-           f'Temperature is {wthr.temperature_kel}°K, feels like {wthr.temperature_kel_feeling}°K'
+    if wthr.country == 'US':
+        return f'{wthr.location}, {wthr.description}\n' \
+           f'Temperature is {wthr.temperature_fah}°F, feels like {wthr.temperature_fah_feeling}°F'
+    else:
+        return f'{wthr.location}, {wthr.description}\n' \
+               f'Temperature is {wthr.temperature_cel}°C, feels like {wthr.temperature_cel_feeling}°C'
 
 
 def wind(coordinates: Optional[Coordinates] = None) -> str:
@@ -32,5 +29,9 @@ def wind(coordinates: Optional[Coordinates] = None) -> str:
 def suntime(coordinates: Optional[Coordinates] = None) -> str:
     """Returns a message about the time of sunrise and sunset"""
     wthr = get_weather(coordinates)
-    return f'Sunrise: {wthr.sunrise.strftime("%c")}\n' \
-           f'Sunset: {wthr.sunset.strftime("%c")}\n'
+    if wthr.country == 'US':
+        return f'Sunrise: {wthr.sunrise.strftime("%I:%M:%S %p")}\n' \
+               f'Sunset: {wthr.sunset.strftime("%I:%M:%S %p")}\n'
+    else:
+        return f'Sunrise: {wthr.sunrise.strftime("%H:%M:%S")}\n' \
+               f'Sunset: {wthr.sunset.strftime("%H:%M:%S")}\n'

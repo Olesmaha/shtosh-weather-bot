@@ -7,11 +7,5 @@ Full and simple instructions you will find inside the original readme file, but 
 1. You must create .env file: 
 BOT_TOKEN = ''
 WEATHER_API_KEY = ''
-WEATHER_API_CALL_1 = ''
-WEATHER_API_CALL_2 = ''
 2. You have to put token of your bot to BOT_TOKEN = '*HERE*' field, inside .env file.
 3. You have to put your API key to WEATHER_API_KEY = '*HERE*' field, inside .env file.
-4. You have to put your API call to WEATHER_API_CALL_1 = '*HERE*' and WEATHER_API_CALL_2 = '*HERE*' fields.
-The reason why I separate weather API call for two parts is feature of my own call that is API key is between
-two parts of characteristic of call. If your call is different you don't need that option, but don't forget to
-change CURRENT_WEATHER_API_CALL in config.py file. 

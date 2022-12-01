@@ -1,4 +1,4 @@
-# fly.toml file generated for shtosh-weather-bot on 2022-11-30T21:13:32+04:00
+# fly.toml file generated for shtosh-weather-bot on 2022-12-01T14:37:35+04:00
 
 app = "shtosh-weather-bot"
 kill_signal = "SIGINT"
