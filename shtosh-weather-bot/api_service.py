@@ -32,6 +32,7 @@ class Weather:
     temperature_fah_feeling: Fahrenheit
     description: str
     wind_speed: float
+    wind_speed_mph: int
     wind_direction: str
     sunrise: datetime
     sunset: datetime
@@ -64,6 +65,7 @@ def _parse_openweather_response(openweather_response: str) -> Weather:
         sunrise=_parse_sun_time(openweather_dict, 'sunrise'),
         sunset=_parse_sun_time(openweather_dict, 'sunset'),
         wind_speed=_parse_wind_speed(openweather_dict),
+        wind_speed_mph=_parse_wind_speed_mph(openweather_dict),
         wind_direction=_parse_wind_direction(openweather_dict),
         country=_parse_country(openweather_dict)
     )
@@ -102,6 +104,11 @@ def _parse_sun_time(openweather_dict: dict, time: Literal['sunrise', 'sunset']) 
 
 def _parse_wind_speed(openweather_dict: dict) -> float:
     return openweather_dict['wind']['speed']
+
+
+def _parse_wind_speed_mph(openweather_dict: dict) -> int:
+    openweather_dict['wind']['speed_mph'] = int(openweather_dict['wind']['speed'] * 2.23693629)
+    return openweather_dict['wind']['speed_mph']
 
 
 def _parse_wind_direction(openweather_dict: dict) -> str:
