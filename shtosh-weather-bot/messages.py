@@ -1,40 +1,36 @@
 from typing import Optional
-
-from coordinates import get_coordinates, Coordinates
+from dataclasses import dataclass
 from api_service import get_weather
 
 
-def weather(coordinates: Optional[Coordinates] = None) -> str:
-    """Returns a message about the temperature and weather description"""
-    location_text = 'user'
-    if coordinates is None:
-        location_text = 'server'
-        coordinates = get_coordinates()
+@dataclass(slots=True, frozen=True)
+class Coordinates:
+    latitude: float
+    longitude: float
 
+
+def weather_celsius(coordinates: Optional[Coordinates] = None) -> str:
+    """Returns a message about the temperature and weather description"""
     wthr = get_weather(coordinates)
-    return f'{wthr.location}, {wthr.description} ({location_text})\n' \
-           f'Temperature is {wthr.temperature}°C, feels like {wthr.temperature_feeling}°C'
+    return f'{wthr.location}, {wthr.description}\n' \
+           f'Temperature is {wthr.temperature_cel}°C, feels like {wthr.temperature_cel_feeling}°C'
+
+
+def weather_kelvin(coordinates: Optional[Coordinates] = None) -> str:
+    """Returns a message about the temperature and weather description"""
+    wthr = get_weather(coordinates)
+    return f'{wthr.location}, {wthr.description}\n' \
+           f'Temperature is {wthr.temperature_kel}°K, feels like {wthr.temperature_kel_feeling}°K'
 
 
 def wind(coordinates: Optional[Coordinates] = None) -> str:
     """Returns a message about wind direction and speed"""
-    location_text = 'user'
-    if coordinates is None:
-        location_text = 'server'
-        coordinates = get_coordinates()
-
     wthr = get_weather(coordinates)
-    return f'{wthr.wind_direction} wind {wthr.wind_speed} m/s  ({location_text})'
+    return f'{wthr.wind_direction} wind {wthr.wind_speed} m/s'
 
 
 def suntime(coordinates: Optional[Coordinates] = None) -> str:
     """Returns a message about the time of sunrise and sunset"""
-    location_text = 'user'
-    if coordinates is None:
-        location_text = 'server'
-        coordinates = get_coordinates()
-
     wthr = get_weather(coordinates)
-    return f'Sunrise: {wthr.sunrise.strftime("%H:%M")}\n' \
-           f'Sunset: {wthr.sunset.strftime("%H:%M")}\n' \
-           f' ({location_text})'
+    return f'Sunrise: {wthr.sunrise.strftime("%c")}\n' \
+           f'Sunset: {wthr.sunset.strftime("%c")}\n'
