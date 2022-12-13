@@ -1,45 +1,46 @@
-from typing import Optional
-from dataclasses import dataclass
+from datetime import datetime
+
 from api_service import get_weather
+from all_db_operations import get_weather_data
 
 
-@dataclass(slots=True, frozen=True)
-class Coordinates:
-    latitude: float
-    longitude: float
-
-
-def weather(coordinates: Optional[Coordinates] = None) -> str:
+def weather(latitude, longitude, user_id) -> str:
     """Returns a message about the temperature and weather description"""
-    wthr = get_weather(coordinates)
+    get_weather(latitude, longitude, user_id)
     countries_which_use_fahrenheit = ('KY', 'LR', 'US', )
-    if wthr.country in countries_which_use_fahrenheit:
-        return f'{wthr.location}, {wthr.description}\n' \
-           f'Temperature is {wthr.temperature_fah}°F, feels like {wthr.temperature_fah_feeling}°F'
+    wthr = get_weather_data(user_id)
+    if wthr[-1] in countries_which_use_fahrenheit:
+        return f'{wthr[1]}, {wthr[6]}\n' \
+           f'Temperature is {wthr[4]}°F, feels like {wthr[5]}°F'
     else:
-        return f'{wthr.location}, {wthr.description}\n' \
-               f'Temperature is {wthr.temperature_cel}°C, feels like {wthr.temperature_cel_feeling}°C'
+        return f'{wthr[1]}, {wthr[6]}\n' \
+               f'Temperature is {wthr[2]}°C, feels like {wthr[3]}°C'
 
 
-def wind(coordinates: Optional[Coordinates] = None) -> str:
+def wind(latitude, longitude, user_id) -> str:
     """Returns a message about wind direction and speed"""
-    wthr = get_weather(coordinates)
+    get_weather(latitude, longitude, user_id)
     countries_which_use_mph = ('AG', 'BS', 'GI', 'GD', 'GU', 'LR', 'MM', 'PR', 'SH',
                                'KN', 'LC', 'VC', 'WS', 'GB', 'US', 'VG', 'VI',)
-    if wthr.country in countries_which_use_mph:
-        return f'{wthr.wind_direction} wind {wthr.wind_speed_mph} mph'
+    wthr = get_weather_data(user_id)
+    if wthr[-1] in countries_which_use_mph:
+        return f'{wthr[-2]} wind {wthr[-3]} mph'
     else:
-        return f'{wthr.wind_direction} wind {wthr.wind_speed} m/s'
+        return f'{wthr[-2]} wind {wthr[-4]} m/s'
 
 
-def suntime(coordinates: Optional[Coordinates] = None) -> str:
+def suntime(latitude, longitude, user_id) -> str:
     """Returns a message about the time of sunrise and sunset"""
-    wthr = get_weather(coordinates)
+    get_weather(latitude, longitude, user_id)
     countries_which_use_12_hour_clock = ('AU', 'BD', 'CA', 'CO', 'EG', 'SV', 'HN', 'IN', 'IE',
                                          'JO', 'MY', 'MX', 'NZ', 'NI', 'PK', 'PH', 'SA', 'US')
-    if wthr.country in countries_which_use_12_hour_clock:
-        return f'Sunrise: {wthr.sunrise.strftime("%-I:%M %p")}\n' \
-               f'Sunset: {wthr.sunset.strftime("%-I:%M %p")}\n'
+    wthr = get_weather_data(user_id)
+    frmt = "%Y-%m-%d %H:%M:%S"
+    sunrise = datetime.strptime(wthr[-6], frmt)
+    sunset = datetime.strptime(wthr[-5], frmt)
+    if wthr[-1] in countries_which_use_12_hour_clock:
+        return f'Sunrise: {sunrise.strftime("%-I:%M %p")}\n' \
+               f'Sunset: {sunset.strftime("%-I:%M %p")}\n'
     else:
-        return f'Sunrise: {wthr.sunrise.strftime("%H:%M")}\n' \
-               f'Sunset: {wthr.sunset.strftime("%H:%M")}\n'
+        return f'Sunrise: {sunrise.strftime("%H:%M")}\n' \
+               f'Sunset: {sunset.strftime("%H:%M")}\n'

@@ -1,27 +1,15 @@
 import logging
-from typing import Optional
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import ContentType
-
 import inline_keyboard
 import messages
 import config
-from dataclasses import dataclass
+from all_db_operations import put_user_data, get_coordinates
 
 logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=config.BOT_API_TOKEN)
 dp = Dispatcher(bot)
-
-
-@dataclass(slots=True, frozen=True)
-class Coordinates:
-    latitude: float
-    longitude: float
-
-
-users_date = {}
-user_coordinates: Optional[Coordinates] = None
 
 
 @dp.message_handler(commands='start')
@@ -34,28 +22,38 @@ async def show_weather(message: types.Message):
 
 @dp.message_handler(content_types=ContentType.LOCATION)
 async def get_location(message: types.Message):
-    global user_coordinates
-    user_coordinates = Coordinates(longitude=message.location.longitude, latitude=message.location.latitude)
-    users_date[message.from_user.id] = user_coordinates
-    await message.answer(text=f'Thank you! Now choose type of information:',
+    put_user_data(message.from_user.id,
+                  message.from_user.first_name,
+                  user_coordinates_latitude=message.location.latitude,
+                  user_coordinate_longitude=message.location.longitude)
+    await message.answer(text=f'Thank you, {message.from_user.first_name}! Now choose type of information:',
                          reply_markup=inline_keyboard.START)
 
 
 @dp.message_handler(commands='weather')
 async def show_weather(message: types.Message):
-    await message.answer(text=messages.weather(users_date[message.from_user.id]),
+    await message.answer(text=messages.weather(
+        get_coordinates(message.from_user.id)[0],
+        get_coordinates(message.from_user.id)[1],
+        message.from_user.id),
                          reply_markup=inline_keyboard.WEATHER)
 
 
 @dp.message_handler(commands='wind')
 async def show_wind(message: types.Message):
-    await message.answer(text=messages.wind(users_date[message.from_user.id]),
+    await message.answer(text=messages.wind(
+        get_coordinates(message.from_user.id)[0],
+        get_coordinates(message.from_user.id)[1],
+        message.from_user.id),
                          reply_markup=inline_keyboard.WIND)
 
 
 @dp.message_handler(commands='sun_time')
 async def show_sun_time(message: types.Message):
-    await message.answer(text=messages.suntime(users_date[message.from_user.id]),
+    await message.answer(text=messages.suntime(
+        get_coordinates(message.from_user.id)[0],
+        get_coordinates(message.from_user.id)[1],
+        message.from_user.id),
                          reply_markup=inline_keyboard.SUN_TIME)
 
 
@@ -64,9 +62,11 @@ async def process_callback_weather(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(
         callback_query.from_user.id,
-        text=messages.weather(users_date[callback_query.from_user.id]),
-        reply_markup=inline_keyboard.WEATHER
-    )
+        text=messages.weather(
+        get_coordinates(callback_query.from_user.id)[0],
+        get_coordinates(callback_query.from_user.id)[1],
+        callback_query.from_user.id),
+        reply_markup=inline_keyboard.WEATHER)
 
 
 @dp.callback_query_handler(text='wind')
@@ -74,9 +74,11 @@ async def process_callback_wind(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(
         callback_query.from_user.id,
-        text=messages.wind(users_date[callback_query.from_user.id]),
-        reply_markup=inline_keyboard.WIND
-    )
+        text=messages.wind(
+        get_coordinates(callback_query.from_user.id)[0],
+        get_coordinates(callback_query.from_user.id)[1],
+        callback_query.from_user.id),
+        reply_markup=inline_keyboard.WIND)
 
 
 @dp.callback_query_handler(text='sun_time')
@@ -84,9 +86,11 @@ async def process_callback_sun_time(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(
         callback_query.from_user.id,
-        text=messages.suntime(users_date[callback_query.from_user.id]),
-        reply_markup=inline_keyboard.SUN_TIME
-    )
+        text=messages.suntime(
+        get_coordinates(callback_query.from_user.id)[0],
+        get_coordinates(callback_query.from_user.id)[1],
+        callback_query.from_user.id),
+        reply_markup=inline_keyboard.SUN_TIME)
 
 
 if __name__ == '__main__':

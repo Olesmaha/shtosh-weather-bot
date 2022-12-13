@@ -1,12 +1,10 @@
 from typing import Literal, TypeAlias
 from urllib.request import urlopen
-from dataclasses import dataclass
 from datetime import datetime
 from enum import IntEnum
 import json
-
-from bot import Coordinates
 import config
+from all_db_operations import put_weather_data
 
 Celsius: TypeAlias = float
 Fahrenheit: TypeAlias = float
@@ -23,39 +21,24 @@ class WindDirection(IntEnum):
     Northwest = 315
 
 
-@dataclass(slots=True, frozen=True)
-class Weather:
-    location: str
-    temperature_cel: Celsius
-    temperature_cel_feeling: Celsius
-    temperature_fah: Fahrenheit
-    temperature_fah_feeling: Fahrenheit
-    description: str
-    wind_speed: float
-    wind_speed_mph: int
-    wind_direction: str
-    sunrise: datetime
-    sunset: datetime
-    country: str
-
-
-def get_weather(coordinates=Coordinates) -> Weather:
+def get_weather(latitude, longitude, user_id):
     """Request the weather in OpenWeather API and returns it"""
     openweather_response = _get_openweather_response(
-        longitude=coordinates.longitude, latitude=coordinates.latitude
+        latitude, longitude
     )
-    weather = _parse_openweather_response(openweather_response)
+    weather = _parse_openweather_response(user_id, openweather_response)
     return weather
 
 
-def _get_openweather_response(latitude: float, longitude: float) -> str:
+def _get_openweather_response(latitude, longitude) -> str:
     url = config.CURRENT_WEATHER_API_CALL.format(latitude=latitude, longitude=longitude)
     return urlopen(url).read()
 
 
-def _parse_openweather_response(openweather_response: str) -> Weather:
+def _parse_openweather_response(user_id, openweather_response: str):
     openweather_dict = json.loads(openweather_response)
-    return Weather(
+    return put_weather_data(
+        user_id=user_id,
         location=_parse_location(openweather_dict),
         temperature_cel=_parse_temperature_cel(openweather_dict),
         temperature_cel_feeling=_parse_temperature_cel_feeling(openweather_dict),
@@ -68,7 +51,7 @@ def _parse_openweather_response(openweather_response: str) -> Weather:
         wind_speed_mph=_parse_wind_speed_mph(openweather_dict),
         wind_direction=_parse_wind_direction(openweather_dict),
         country=_parse_country(openweather_dict)
-    )
+        )
 
 
 def _parse_location(openweather_dict: dict) -> str:
