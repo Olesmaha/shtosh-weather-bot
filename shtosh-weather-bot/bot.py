@@ -4,7 +4,7 @@ from aiogram.types import ContentType
 import inline_keyboard
 import messages
 import config
-from all_db_operations import put_user_data, get_coordinates
+from all_db_operations import put_user_data, get_coordinates, init_tables
 
 logging.basicConfig(level=logging.INFO)
 
@@ -57,6 +57,14 @@ async def show_sun_time(message: types.Message):
                          reply_markup=inline_keyboard.SUN_TIME)
 
 
+@dp.message_handler(commands='refresh')
+async def refresh(message: types.Message):
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    keyboard.add(types.KeyboardButton(text='Refresh geolocation', request_location=True))
+    await message.answer(text=f"Please, click the button.",
+                         reply_markup=keyboard)
+
+
 @dp.callback_query_handler(text='weather')
 async def process_callback_weather(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id)
@@ -93,5 +101,17 @@ async def process_callback_sun_time(callback_query: types.CallbackQuery):
         reply_markup=inline_keyboard.SUN_TIME)
 
 
+@dp.callback_query_handler(text='refresh')
+async def process_callback_refresh(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    keyboard.add(types.KeyboardButton(text='Refresh geolocation', request_location=True))
+    await bot.send_message(
+        callback_query.from_user.id,
+        text=f"Please, click the button.",
+        reply_markup=keyboard)
+
+
 if __name__ == '__main__':
+    init_tables()
     executor.start_polling(dp, skip_updates=True)
